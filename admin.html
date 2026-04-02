@@ -1016,7 +1016,7 @@ function buildPanelContent(shift) {
 
 function bindPanelEvents(inner, shift) {
   inner.querySelectorAll('[data-action]').forEach(el => {
-    el.addEventListener('click', e => {
+    el.addEventListener('click', async e => {
       e.stopPropagation();
       const action = el.dataset.action;
       const vid    = el.dataset.vid;
