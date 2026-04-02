@@ -54,12 +54,6 @@
       gap: 12px;
     }
 
-    .header-logo img {
-      height: 44px;
-      width: 44px;
-      object-fit: contain;
-      filter: brightness(0) invert(1);
-    }
 
     .header-title {
       font-family: 'Oswald', sans-serif;
@@ -266,20 +260,25 @@
 
     .card-slots {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 5px;
+      flex-wrap: nowrap;
     }
 
     .slot {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       background: var(--card2);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 0.78rem;
+      padding: 4px 8px;
+      font-size: 0.72rem;
       color: var(--text-dim);
+      flex: 1;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .slot.filled {
@@ -323,12 +322,11 @@
 
     .slot-icon { font-size: 0.85rem; }
 
-    /* Right side */
-    .card-right {
+    .card-bottom {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
+      margin-top: 8px;
     }
 
     .status-pill {
@@ -632,7 +630,6 @@
 
 <!-- NOT FOUND SCREEN -->
 <div id="notFoundScreen" class="screen-center" style="display:none">
-  <img src="publogo.jpg" alt="Bartender" />
   <h2>לינק לא תקין</h2>
   <p>הלינק שלך לא תואם לאף מתנדב במערכת. פנה למנהלת לקבלת לינק חדש.</p>
 </div>
@@ -642,7 +639,6 @@
 
   <header>
     <div class="header-logo">
-      <img src="publogo.jpg" alt="Bartender" />
       <div class="header-title">
         Bartender
         <span>שיבוץ משמרות</span>
@@ -881,10 +877,10 @@ function buildCard(shift) {
           ${shift.type === 'special' ? `⭐ ${shift.label || 'ערב מיוחד'}` : 'משמרת רגילה'}
         </div>
         <div class="card-slots">${slotsHTML}</div>
-      </div>
-      <div class="card-right">
-        <div class="status-pill ${pillClass}">${pillText}</div>
-        ${hasNote ? `<div class="note-btn" data-id="${shift.id}">📋</div>` : ''}
+        <div class="card-bottom">
+          <div class="status-pill ${pillClass}">${pillText}</div>
+          ${hasNote ? `<div class="note-btn" data-id="${shift.id}">📋</div>` : ''}
+        </div>
       </div>
     </div>
     <div class="card-expand" id="expand-${shift.id}">
