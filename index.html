@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bartender — שיבוץ משמרות</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0B0705;
+      --card:       #151210;
+      --card2:      #1E1814;
+      --border:     #2E2118;
+      --text:       #F5F0E8;
+      --text-dim:   #8A7D6E;
+      --gold:       #C9A84C;
+      --gold-glow:  rgba(201,168,76,0.15);
+      --green:      #4CAF7D;
+      --green-bg:   rgba(76,175,125,0.12);
+      --red:        #E05252;
+      --red-bg:     rgba(224,82,82,0.12);
+      --amber:      #E8943A;
+      --amber-bg:   rgba(232,148,58,0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 60px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(180deg, #0F0B08 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-logo img {
+      height: 44px;
+      width: 44px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+
+    .header-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.35rem;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    .header-title span {
+      display: block;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      font-weight: 400;
+      margin-top: 1px;
+    }
+
+    .volunteer-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .volunteer-badge strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .volunteer-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    /* ── MONTH NAV ── */
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 20px 12px;
+    }
+
+    .month-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+
+    .month-label span {
+      color: var(--gold);
+    }
+
+    .nav-btn {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* ── LEGEND ── */
+    .legend {
+      display: flex;
+      gap: 16px;
+      padding: 0 20px 20px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* ── WEEK SEPARATOR ── */
+    .week-label {
+      padding: 8px 20px 4px;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* ── SHIFT CARD ── */
+    .shift-card {
+      margin: 0 14px 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .shift-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .shift-card.status-full {
+      border-color: rgba(76,175,125,0.3);
+    }
+
+    .shift-card.status-partial {
+      border-color: rgba(232,148,58,0.3);
+    }
+
+    .shift-card.status-empty {
+      border-color: rgba(224,82,82,0.25);
+    }
+
+    .shift-card.status-swap {
+      border-color: rgba(201,168,76,0.4);
+      box-shadow: 0 0 0 1px rgba(201,168,76,0.15);
+    }
+
+    .card-main {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      gap: 14px;
+    }
+
+    /* Date block */
+    .card-date {
+      text-align: center;
+      min-width: 48px;
+    }
+
+    .card-day-name {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .card-day-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.8rem;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .card-month-short {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Divider */
+    .card-divider {
+      width: 1px;
+      height: 50px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Info */
+    .card-info {
+      flex: 1;
+    }
+
+    .card-type {
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .card-slots {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .slot {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    .slot.filled {
+      border-color: rgba(76,175,125,0.4);
+      color: var(--green);
+      background: var(--green-bg);
+    }
+
+    .slot.filled-me {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-glow);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .slot.filled-me:hover {
+      background: rgba(224,82,82,0.12);
+      border-color: rgba(224,82,82,0.5);
+      color: var(--red);
+    }
+
+    .slot.swap-needed {
+      border-color: rgba(201,168,76,0.5);
+      color: var(--gold);
+      background: var(--gold-glow);
+    }
+
+    .slot.empty {
+      border-style: dashed;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .slot.empty:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: var(--gold-glow);
+    }
+
+    .slot-icon { font-size: 0.85rem; }
+
+    /* Right side */
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .status-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 12px;
+      padding: 3px 10px;
+      white-space: nowrap;
+    }
+
+    .pill-full    { background: var(--green-bg);  color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
+    .pill-partial { background: var(--amber-bg);  color: var(--amber); border: 1px solid rgba(232,148,58,0.3); }
+    .pill-empty   { background: var(--red-bg);    color: var(--red);   border: 1px solid rgba(224,82,82,0.3); }
+    .pill-swap    { background: var(--gold-glow); color: var(--gold);  border: 1px solid rgba(201,168,76,0.4); }
+    .pill-mine    { background: var(--gold-glow); color: var(--gold);  border: 1px solid var(--gold); }
+
+    .note-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gold-glow);
+      border: 1px solid rgba(201,168,76,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: var(--gold);
+      cursor: pointer;
+      transition: all 0.2s;
+      animation: pulse-note 2s infinite;
+    }
+
+    @keyframes pulse-note {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
+      50%       { box-shadow: 0 0 0 4px rgba(201,168,76,0); }
+    }
+
+    /* ── EXPANDED PANEL ── */
+    .card-expand {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+      background: var(--card2);
+      border-top: 0px solid var(--border);
+    }
+
+    .card-expand.open {
+      max-height: 400px;
+      border-top-width: 1px;
+    }
+
+    .expand-inner {
+      padding: 16px;
+    }
+
+    .expand-note {
+      background: rgba(201,168,76,0.08);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    .expand-note-label {
+      font-size: 0.7rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    /* Action buttons */
+    .action-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0B0705;
+    }
+
+    .btn-primary:hover {
+      background: #D4B55C;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(201,168,76,0.3);
+    }
+
+    .btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(224,82,82,0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(224,82,82,0.2);
+    }
+
+    .btn-ghost {
+      background: var(--card);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* ── SPECIAL DAY BADGE ── */
+    .special-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      color: var(--amber);
+      background: var(--amber-bg);
+      border: 1px solid rgba(232,148,58,0.3);
+      border-radius: 10px;
+      padding: 2px 8px;
+      margin-top: 4px;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 0.88rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: rgba(76,175,125,0.5); }
+    .toast.error   { border-color: rgba(224,82,82,0.5); }
+
+    /* ── NOT FOUND / LOADING ── */
+    .screen-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 30px;
+      text-align: center;
+      gap: 16px;
+    }
+
+    .screen-center img {
+      height: 70px;
+      filter: brightness(0) invert(1);
+      opacity: 0.5;
+      margin-bottom: 8px;
+    }
+
+    .screen-center h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+
+    .screen-center p {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      max-width: 280px;
+      line-height: 1.6;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MODAL (הערה) ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 520px;
+      padding: 24px 20px 36px;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .modal-backdrop.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-handle {
+      width: 36px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+
+    .modal-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .modal-body {
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" class="screen-center">
+  <div class="spinner"></div>
+  <p style="color:var(--text-dim);font-size:0.85rem;">טוען...</p>
+</div>
+
+<!-- NOT FOUND SCREEN -->
+<div id="notFoundScreen" class="screen-center" style="display:none">
+  <img src="publogo.jpg" alt="Bartender" />
+  <h2>לינק לא תקין</h2>
+  <p>הלינק שלך לא תואם לאף מתנדב במערכת. פנה למנהלת לקבלת לינק חדש.</p>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <header>
+    <div class="header-logo">
+      <img src="publogo.jpg" alt="Bartender" />
+      <div class="header-title">
+        Bartender
+        <span>שיבוץ משמרות</span>
+      </div>
+    </div>
+    <div class="volunteer-badge">
+      <div class="volunteer-dot"></div>
+      <strong id="volName">—</strong>
+    </div>
+  </header>
+
+  <div class="month-nav">
+    <button class="nav-btn" id="prevMonth">‹</button>
+    <div class="month-label" id="monthLabel">אפריל <span>2026</span></div>
+    <button class="nav-btn" id="nextMonth">›</button>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> מאויש</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> נדרשים עוד</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> פתוח לרישום</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> בקשת החלפה</div>
+  </div>
+
+  <div id="shiftsList"></div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="noteModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle">הערת משמרת</div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+// ════════════════════════════════════════════
+//  FIREBASE INIT
+// ════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey: "AIzaSyB-nUFuOifn3lEOxidWQWAQ-YP8Cgzgvjo",
+  authDomain: "bartender-efe04.firebaseapp.com",
+  databaseURL: "https://bartender-efe04-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "bartender-efe04",
+  storageBucket: "bartender-efe04.firebasestorage.app",
+  messagingSenderId: "519302139819",
+  appId: "1:519302139819:web:6492d96200228afa30ccee"
+});
+const db = firebase.database();
+firebase.auth().signInAnonymously().catch(e => console.warn('auth:', e));
+const ROOT = 'shifts_app';
+
+// ════════════════════════════════════════════
+//  STATE — מסונכרן מ-Firebase
+// ════════════════════════════════════════════
+let VOLUNTEERS    = {};  // { vid: { name, phone, isAchmash } }
+let SHIFTS_RAW    = {};  // { sid: { date, type, label, minSlots, maxSlots, note, achmash } }
+let REGISTRATIONS = {};  // { sid: { vid: timestamp } }
+let SWAP_REQUESTS = {};  // { sid: { vid: true } }
+
+function getShifts() {
+  return Object.entries(SHIFTS_RAW)
+    .map(([sid, s]) => ({
+      id: sid,
+      ...s,
+      registered:   Object.keys(REGISTRATIONS[sid] || {}),
+      registeredAt: REGISTRATIONS[sid] || {},
+      swapRequests: Object.keys(SWAP_REQUESTS[sid] || {}),
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+
+const HEBREW_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DAY_NAMES     = { 4: "חמישי", 5: "שישי", 6: "שבת", 0: "ראשון", 1: "שני", 2: "שלישי", 3: "רביעי" };
+const MONTH_SHORT   = ['ינו','פבר','מרץ','אפר','מאי','יוני','יולי','אוג','ספט','אוק','נוב','דצמ'];
+
+let currentVolId = null;
+let currentVol   = null;
+let viewYear     = 2026;
+let viewMonth    = 3; // 0-based: 3 = אפריל
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  let vid = params.get('vid') || localStorage.getItem('btdr_shift_vid');
+
+  // טען את פרטי המתנדב
+  const volSnap = await db.ref(`${ROOT}/volunteers/${vid}`).once('value');
+  const vol = volSnap.val();
+
+  if (!vid || !vol) {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('notFoundScreen').style.display = 'flex';
+    return;
+  }
+
+  localStorage.setItem('btdr_shift_vid', vid);
+  currentVolId = vid;
+  currentVol   = vol;
+  document.getElementById('volName').textContent = vol.name;
+
+  // טען כל המתנדבים (לתצוגת שמות)
+  const volsSnap = await db.ref(`${ROOT}/volunteers`).once('value');
+  VOLUNTEERS = volsSnap.val() || {};
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  bindNav();
+
+  // האזן לשינויים בזמן אמת
+  db.ref(`${ROOT}/shifts`).on('value', snap => {
+    SHIFTS_RAW = snap.val() || {};
+    renderShifts();
+  });
+  db.ref(`${ROOT}/registrations`).on('value', snap => {
+    REGISTRATIONS = snap.val() || {};
+    renderShifts();
+  });
+  db.ref(`${ROOT}/swapRequests`).on('value', snap => {
+    SWAP_REQUESTS = snap.val() || {};
+    renderShifts();
+  });
+}
+
+// ════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════
+
+function renderShifts() {
+  const list = document.getElementById('shiftsList');
+  list.innerHTML = '';
+
+  // סנן משמרות לחודש הנוכחי
+  const monthShifts = getShifts().filter(s => {
+    const d = new Date(s.date);
+    return d.getFullYear() === viewYear && d.getMonth() === viewMonth;
+  });
+
+  // עדכן כותרת חודש
+  document.getElementById('monthLabel').innerHTML =
+    `${HEBREW_MONTHS[viewMonth]} <span>${viewYear}</span>`;
+
+  if (monthShifts.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📅</div>
+        <p>אין משמרות מתוכננות לחודש זה עדיין.</p>
+      </div>`;
+    return;
+  }
+
+  // קבץ לפי שבוע
+  const weeks = {};
+  monthShifts.forEach(s => {
+    const d   = new Date(s.date);
+    const wk  = getWeekNumber(d);
+    if (!weeks[wk]) weeks[wk] = [];
+    weeks[wk].push(s);
+  });
+
+  Object.keys(weeks).sort().forEach(wk => {
+    const wLabel = document.createElement('div');
+    wLabel.className = 'week-label';
+    wLabel.textContent = `שבוע ${parseInt(wk) + 1 - getWeekNumber(new Date(viewYear, viewMonth, 1))}`;
+    list.appendChild(wLabel);
+
+    weeks[wk].forEach(shift => {
+      list.appendChild(buildCard(shift));
+    });
+  });
+}
+
+function buildCard(shift) {
+  const d          = new Date(shift.date);
+  const dayName    = DAY_NAMES[d.getDay()] || '';
+  const dayNum     = d.getDate();
+  const monthShort = MONTH_SHORT[d.getMonth()];
+
+  const isMine     = shift.registered.includes(currentVolId);
+  const wantsSwap  = shift.swapRequests.includes(currentVolId);
+  const hasSwapReq = shift.swapRequests.length > 0;
+  const isFull     = shift.registered.length >= shift.maxSlots;
+  const hasNote    = !!shift.note;
+
+  // סטטוס
+  let statusClass, pillClass, pillText;
+  if (hasSwapReq && !isMine) {
+    statusClass = 'status-swap'; pillClass = 'pill-swap'; pillText = '🔄 נדרש מחליף';
+  } else if (isMine && wantsSwap) {
+    statusClass = 'status-swap'; pillClass = 'pill-swap'; pillText = '🔄 ביקשת החלפה';
+  } else if (isMine) {
+    statusClass = 'status-full'; pillClass = 'pill-mine'; pillText = '✓ רשום/ה';
+  } else if (isFull) {
+    statusClass = 'status-full'; pillClass = 'pill-full'; pillText = 'מאויש';
+  } else if (shift.registered.length >= shift.minSlots) {
+    statusClass = 'status-partial'; pillClass = 'pill-partial'; pillText = `נדרשים עוד ${shift.maxSlots - shift.registered.length}`;
+  } else {
+    statusClass = 'status-empty'; pillClass = 'pill-empty'; pillText = 'פתוח לרישום';
+  }
+
+  // בניית slots
+  const slotsHTML = buildSlots(shift);
+
+  // כרטיס
+  const card = document.createElement('div');
+  card.className = `shift-card ${statusClass}`;
+  card.dataset.id = shift.id;
+
+  card.innerHTML = `
+    <div class="card-main">
+      <div class="card-date">
+        <div class="card-day-name">${dayName}</div>
+        <div class="card-day-num">${dayNum}</div>
+        <div class="card-month-short">${monthShort}</div>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-info">
+        <div class="card-type">
+          ${shift.type === 'special' ? `⭐ ${shift.label || 'ערב מיוחד'}` : 'משמרת רגילה'}
+        </div>
+        <div class="card-slots">${slotsHTML}</div>
+      </div>
+      <div class="card-right">
+        <div class="status-pill ${pillClass}">${pillText}</div>
+        ${hasNote ? `<div class="note-btn" data-id="${shift.id}">📋</div>` : ''}
+      </div>
+    </div>
+    <div class="card-expand" id="expand-${shift.id}">
+      <div class="expand-inner">
+        ${hasNote ? `
+          <div class="expand-note">
+            <div class="expand-note-label">📋 הערת משמרת</div>
+            ${shift.note}
+          </div>
+        ` : ''}
+        <div class="action-btns">
+          ${buildActionBtns(shift, isMine, wantsSwap, isFull, hasSwapReq)}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // לחיצה על הכרטיס — פתיחת panel
+  card.querySelector('.card-main').addEventListener('click', () => toggleExpand(shift.id));
+
+  // כפתור הערה עצור propagation
+  const noteBtn = card.querySelector('.note-btn');
+  if (noteBtn) {
+    noteBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      openNoteModal(shift);
+    });
+  }
+
+  // לחיצה ישירה על slot פנוי
+  card.querySelectorAll('.slot.empty[data-action]').forEach(slot => {
+    slot.addEventListener('click', e => {
+      e.stopPropagation();
+      handleAction('register', shift);
+    });
+  });
+
+  // לחיצה על ה-slot שלי — ביטול תוך שעה
+  card.querySelectorAll('.slot.filled-me[data-action]').forEach(slot => {
+    slot.addEventListener('click', e => {
+      e.stopPropagation();
+      handleAction('cancel-reg', shift);
+    });
+  });
+
+  // כפתורי פעולה
+  bindActionBtns(card, shift, isMine, wantsSwap, isFull, hasSwapReq);
+
+  return card;
+}
+
+function buildSlots(shift) {
+  const slots = [];
+  for (let i = 0; i < shift.maxSlots; i++) {
+    const volId = shift.registered[i];
+    if (!volId) {
+      slots.push(`<div class="slot empty" data-action="register"><span class="slot-icon">+</span> פנוי</div>`);
+    } else {
+      const vol = VOLUNTEERS[volId];
+      const isMe = volId === currentVolId;
+      const swapReq = shift.swapRequests.includes(volId);
+      const isAchmash = shift.achmash === volId;
+      let cls = isMe ? 'filled-me' : (swapReq ? 'swap-needed' : 'filled');
+      let icon = isAchmash ? '★' : '✓';
+      let name = isMe ? 'את/ה' : (vol ? vol.name : '?');
+      if (swapReq) { icon = '🔄'; name += ' (מחליף?)'; }
+      const meAttr = isMe ? ' data-action="cancel-reg"' : '';
+      slots.push(`<div class="slot ${cls}"${meAttr}><span class="slot-icon">${icon}</span>${name}${isAchmash ? ' · אחמ"א' : ''}</div>`);
+    }
+  }
+  return slots.join('');
+}
+
+function buildActionBtns(shift, isMine, wantsSwap, isFull, hasSwapReq) {
+  if (isMine && !wantsSwap) {
+    return `
+      <button class="btn btn-danger" data-action="swap">🔄 בקש החלפה</button>
+    `;
+  }
+  if (isMine && wantsSwap) {
+    return `
+      <button class="btn btn-ghost" data-action="cancel-swap">✕ בטל בקשת החלפה</button>
+    `;
+  }
+  if (!isFull || hasSwapReq) {
+    return `
+      <button class="btn btn-primary" data-action="register">✓ אני מתנדב/ת</button>
+    `;
+  }
+  return `<button class="btn btn-ghost" disabled>המשמרת מאוישת</button>`;
+}
+
+function bindActionBtns(card, shift, isMine, wantsSwap, isFull, hasSwapReq) {
+  card.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      handleAction(btn.dataset.action, shift);
+    });
+  });
+}
+
+// ════════════════════════════════════════════
+//  ACTIONS
+// ════════════════════════════════════════════
+
+const CANCEL_WINDOW_MS = 60 * 60 * 1000; // שעה אחת
+
+async function handleAction(action, shift) {
+  if (action === 'register') {
+    await db.ref(`${ROOT}/registrations/${shift.id}/${currentVolId}`).set(Date.now());
+    if (shift.swapRequests.length > 0) {
+      const swapper = shift.swapRequests[0];
+      await db.ref(`${ROOT}/swapRequests/${shift.id}/${swapper}`).remove();
+      showToast(`✓ נרשמת! ${VOLUNTEERS[swapper]?.name || ''} יקבל עדכון.`, 'success');
+    } else {
+      showToast('✓ נרשמת! ניתן לבטל תוך שעה.', 'success');
+    }
+    closeExpand(shift.id);
+    return;
+  }
+
+  if (action === 'cancel-reg') {
+    const ts = shift.registeredAt?.[currentVolId];
+    const elapsed = ts ? Date.now() - ts : Infinity;
+    if (elapsed <= CANCEL_WINDOW_MS) {
+      await db.ref(`${ROOT}/registrations/${shift.id}/${currentVolId}`).remove();
+      showToast('↩ הרישום בוטל.', 'success');
+    } else {
+      showToast('⏱ חלון הביטול נסגר — השתמש בבקשת החלפה.', 'error');
+      toggleExpand(shift.id);
+    }
+    return;
+  }
+
+  if (action === 'swap') {
+    await db.ref(`${ROOT}/swapRequests/${shift.id}/${currentVolId}`).set(true);
+    showToast('🔄 בקשת ההחלפה נשלחה לכל המתנדבים.', 'success');
+    closeExpand(shift.id);
+    return;
+  }
+
+  if (action === 'cancel-swap') {
+    await db.ref(`${ROOT}/swapRequests/${shift.id}/${currentVolId}`).remove();
+    showToast('✕ בקשת ההחלפה בוטלה', 'success');
+    closeExpand(shift.id);
+  }
+}
+
+// ════════════════════════════════════════════
+//  EXPAND / COLLAPSE
+// ════════════════════════════════════════════
+
+let openExpand = null;
+
+function toggleExpand(id) {
+  const el = document.getElementById(`expand-${id}`);
+  if (!el) return;
+  if (openExpand && openExpand !== id) {
+    const prev = document.getElementById(`expand-${openExpand}`);
+    if (prev) prev.classList.remove('open');
+  }
+  el.classList.toggle('open');
+  openExpand = el.classList.contains('open') ? id : null;
+}
+
+function closeExpand(id) {
+  const el = document.getElementById(`expand-${id}`);
+  if (el) el.classList.remove('open');
+  openExpand = null;
+}
+
+// ════════════════════════════════════════════
+//  NOTE MODAL
+// ════════════════════════════════════════════
+
+function openNoteModal(shift) {
+  const d = new Date(shift.date);
+  document.getElementById('modalTitle').textContent =
+    `📋 ${DAY_NAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+  document.getElementById('modalBody').textContent = shift.note || '';
+  document.getElementById('noteModal').classList.add('open');
+}
+
+document.getElementById('noteModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('noteModal')) {
+    document.getElementById('noteModal').classList.remove('open');
+  }
+});
+
+// ════════════════════════════════════════════
+//  MONTH NAVIGATION
+// ════════════════════════════════════════════
+
+function bindNav() {
+  document.getElementById('prevMonth').addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderShifts();
+  });
+  document.getElementById('nextMonth').addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderShifts();
+  });
+}
+
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+
+function getWeekNumber(d) {
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  return Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+}
+
+// ════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

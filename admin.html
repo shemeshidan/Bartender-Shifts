@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bartender — ניהול משמרות</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0B0705;
+      --card:       #151210;
+      --card2:      #1E1814;
+      --border:     #2E2118;
+      --text:       #F5F0E8;
+      --text-dim:   #8A7D6E;
+      --gold:       #C9A84C;
+      --gold-glow:  rgba(201,168,76,0.15);
+      --green:      #4CAF7D;
+      --green-bg:   rgba(76,175,125,0.12);
+      --red:        #E05252;
+      --red-bg:     rgba(224,82,82,0.12);
+      --amber:      #E8943A;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 30px;
+      gap: 20px;
+    }
+
+    #loginScreen img {
+      height: 70px;
+      filter: brightness(0) invert(1);
+      opacity: 0.8;
+    }
+
+    #loginScreen h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      letter-spacing: 2px;
+      text-align: center;
+    }
+
+    #loginScreen p {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(180deg, #0F0B08 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-logo img {
+      height: 38px;
+      filter: brightness(0) invert(1);
+    }
+
+    .header-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      color: var(--gold);
+    }
+
+    .header-title span {
+      display: block;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+
+    .admin-badge {
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 12px;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab {
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .tab:hover { color: var(--text); }
+
+    .tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* ── PAGE ── */
+    .page { display: none; padding: 20px; }
+    .page.active { display: block; }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── FORMS ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--gold);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    select option { background: #1E1814; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .form-card-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--gold);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 10px 18px;
+      border-radius: 9px;
+      border: none;
+      font-family: 'Heebo', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: #0B0705;
+    }
+
+    .btn-primary:hover {
+      background: #D4B55C;
+      box-shadow: 0 3px 12px rgba(201,168,76,0.3);
+    }
+
+    .btn-ghost {
+      background: var(--card2);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+    .btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid rgba(224,82,82,0.3);
+    }
+
+    .btn-danger:hover { background: rgba(224,82,82,0.2); }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      border-radius: 7px;
+    }
+
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* ── VOLUNTEER CARDS ── */
+    .vol-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .vol-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .vol-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .vol-info { flex: 1; }
+
+    .vol-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .vol-phone { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+    .achmash-badge {
+      font-size: 0.65rem;
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.4);
+      color: var(--gold);
+      border-radius: 8px;
+      padding: 1px 7px;
+      font-weight: 700;
+    }
+
+    .vol-actions { display: flex; gap: 6px; }
+
+    /* ── SHIFT ADMIN CARDS ── */
+    .shift-admin-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .shift-admin-header {
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .shift-admin-header:hover { background: rgba(255,255,255,0.02); }
+
+    .shift-date-block {
+      text-align: center;
+      min-width: 44px;
+    }
+
+    .shift-day-name { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; }
+    .shift-day-num  { font-family: 'Oswald', sans-serif; font-size: 1.6rem; line-height: 1; }
+    .shift-month    { font-size: 0.65rem; color: var(--text-dim); }
+
+    .shift-admin-info { flex: 1; }
+
+    .shift-admin-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .shift-slots-summary {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .slot-chip {
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .chip-filled  { background: var(--green-bg);  color: var(--green);  border: 1px solid rgba(76,175,125,0.3); }
+    .chip-empty   { background: var(--red-bg);    color: var(--red);    border: 1px solid rgba(224,82,82,0.3); border-style: dashed; }
+    .chip-achmash { background: var(--gold-glow); color: var(--gold);   border: 1px solid rgba(201,168,76,0.4); }
+
+    .shift-admin-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+      border-top: 0px solid var(--border);
+      background: var(--card2);
+    }
+
+    .shift-admin-panel.open {
+      max-height: 600px;
+      border-top-width: 1px;
+    }
+
+    .panel-inner {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-section { display: flex; flex-direction: column; gap: 8px; }
+
+    .panel-section-title {
+      font-size: 0.72rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* Registered list in panel */
+    .reg-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .reg-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .reg-name { flex: 1; font-size: 0.85rem; font-weight: 600; }
+
+    /* Add volunteer to shift */
+    .add-to-shift {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-to-shift select { flex: 1; }
+
+    /* ── MONTH NAV (shifts tab) ── */
+    .month-nav-admin {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .month-label-admin {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
+    .month-label-admin span { color: var(--gold); }
+
+    .nav-btn {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .nav-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 18px;
+      font-size: 0.85rem;
+      color: var(--text);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: rgba(76,175,125,0.5); }
+    .toast.error   { border-color: rgba(224,82,82,0.5); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── CHECKBOX TOGGLE ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .toggle-label { font-size: 0.85rem; }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      right: 3px;
+      top: 3px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider { background: var(--gold); }
+    .toggle input:checked + .toggle-slider::before {
+      background: #0B0705;
+      transform: translateX(-18px);
+    }
+
+    /* ── EMPTY ── */
+    .empty-msg {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    /* ── LINK COPY ── */
+    .link-box {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      word-break: break-all;
+    }
+
+    .link-box span { flex: 1; }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--gold);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover { background: var(--gold-glow); }
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="loginScreen">
+  <img src="publogo.jpg" alt="Bartender" />
+  <h2>BARTENDER<br/>פאנל ניהול</h2>
+  <p>גישה למנהלת בלבד</p>
+  <div class="login-box">
+    <div class="form-group">
+      <label>סיסמה</label>
+      <input type="password" id="pinInput" placeholder="הקישי סיסמה" />
+    </div>
+    <button class="btn btn-primary btn-full" onclick="tryLogin()">כניסה</button>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="adminApp" style="display:none">
+
+  <header>
+    <div class="header-logo">
+      <img src="publogo.jpg" alt="Bartender" />
+      <div class="header-title">
+        Bartender
+        <span>פאנל ניהול</span>
+      </div>
+    </div>
+    <span class="admin-badge">מנהלת</span>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="shifts">📅 משמרות</div>
+    <div class="tab" data-tab="volunteers">👥 מתנדבים</div>
+    <div class="tab" data-tab="add-shift">➕ משמרת חדשה</div>
+  </div>
+
+  <!-- ── TAB: SHIFTS ── -->
+  <div class="page active" id="tab-shifts">
+
+    <div class="month-nav-admin">
+      <button class="nav-btn" id="adminPrev">‹</button>
+      <div class="month-label-admin" id="adminMonthLabel">אפריל <span>2026</span></div>
+      <button class="nav-btn" id="adminNext">›</button>
+    </div>
+
+    <div id="adminShiftsList"></div>
+
+  </div>
+
+  <!-- ── TAB: VOLUNTEERS ── -->
+  <div class="page" id="tab-volunteers">
+
+    <div class="form-card">
+      <div class="form-card-title">➕ הוספת מתנדב/ת</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>שם מלא</label>
+          <input type="text" id="newVolName" placeholder="שם" />
+        </div>
+        <div class="form-group">
+          <label>טלפון</label>
+          <input type="tel" id="newVolPhone" placeholder="050-0000000" />
+        </div>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">אחמ"א (אחראי משמרת)</span>
+        <label class="toggle">
+          <input type="checkbox" id="newVolAchmash" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="addVolunteer()">➕ הוסף מתנדב/ת</button>
+    </div>
+
+    <div class="section-title">
+      רשימת מתנדבים
+      <span id="volCount" style="font-family:Heebo;font-size:0.8rem;color:var(--text-dim);text-transform:none;letter-spacing:0"></span>
+    </div>
+
+    <div class="vol-list" id="volList"></div>
+
+  </div>
+
+  <!-- ── TAB: ADD SHIFT ── -->
+  <div class="page" id="tab-add-shift">
+
+    <div class="form-card">
+      <div class="form-card-title">📅 הוספת משמרת חדשה</div>
+
+      <div class="form-group">
+        <label>תאריך</label>
+        <input type="date" id="newShiftDate" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>מינימום מתנדבים</label>
+          <select id="newShiftMin">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>מקסימום מתנדבים</label>
+          <select id="newShiftMax">
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <span class="toggle-label">משמרת מיוחדת (אירוע)</span>
+        <label class="toggle">
+          <input type="checkbox" id="newShiftSpecial" onchange="toggleSpecialLabel()" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="form-group" id="specialLabelGroup" style="display:none">
+        <label>תווית האירוע</label>
+        <input type="text" id="newShiftLabel" placeholder='למשל: "ערב הופעה"' />
+      </div>
+
+      <div class="form-group">
+        <label>הערה מיוחדת (אופציונלי)</label>
+        <textarea id="newShiftNote" placeholder="הוראות, שינוי שעות, פרטים חשובים..."></textarea>
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="addShift()">➕ הוסף משמרת</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyB-nUFuOifn3lEOxidWQWAQ-YP8Cgzgvjo",
+  authDomain: "bartender-efe04.firebaseapp.com",
+  databaseURL: "https://bartender-efe04-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "bartender-efe04",
+  storageBucket: "bartender-efe04.firebasestorage.app",
+  messagingSenderId: "519302139819",
+  appId: "1:519302139819:web:6492d96200228afa30ccee"
+});
+const db = firebase.database();
+firebase.auth().signInAnonymously().catch(e => console.warn('auth:', e));
+const ROOT = 'shifts_app';
+
+const ADMIN_PIN = '1234'; // ← שנה לסיסמה שלך
+
+let VOLUNTEERS    = {};
+let SHIFTS_RAW    = {};
+let REGISTRATIONS = {};
+let SWAP_REQUESTS = {};
+
+function getShiftObj(sid) {
+  const s = SHIFTS_RAW[sid] || {};
+  return {
+    id: sid, ...s,
+    registered:   Object.keys(REGISTRATIONS[sid] || {}),
+    registeredAt: REGISTRATIONS[sid] || {},
+    swapRequests: Object.keys(SWAP_REQUESTS[sid]  || {}),
+  };
+}
+
+function getShiftsSorted() {
+  return Object.keys(SHIFTS_RAW)
+    .map(sid => getShiftObj(sid))
+    .sort((a,b) => a.date.localeCompare(b.date));
+}
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+
+const HEBREW_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const DAY_NAMES     = { 0:'ראשון', 1:'שני', 2:'שלישי', 3:'רביעי', 4:'חמישי', 5:'שישי', 6:'שבת' };
+const MONTH_SHORT   = ['ינו','פבר','מרץ','אפר','מאי','יוני','יולי','אוג','ספט','אוק','נוב','דצמ'];
+
+let viewYear  = 2026;
+let viewMonth = 3;
+let openPanel = null;
+
+// ════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════
+
+function tryLogin() {
+  const pin = document.getElementById('pinInput').value;
+  if (pin === ADMIN_PIN || localStorage.getItem('btdr_admin_auth') === 'ok') {
+    localStorage.setItem('btdr_admin_auth', 'ok');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display    = 'block';
+    init();
+  } else {
+    showToast('סיסמה שגויה', 'error');
+    document.getElementById('pinInput').value = '';
+  }
+}
+
+document.getElementById('pinInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryLogin();
+});
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+
+function init() {
+  // בדוק אם כבר מחובר
+  if (localStorage.getItem('btdr_admin_auth') === 'ok') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display    = 'block';
+  }
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+      if (tab.dataset.tab === 'shifts')    renderAdminShifts();
+      if (tab.dataset.tab === 'volunteers') renderVolunteers();
+    });
+  });
+
+  // Month nav
+  document.getElementById('adminPrev').addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderAdminShifts();
+  });
+  document.getElementById('adminNext').addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderAdminShifts();
+  });
+
+  // Set default date for new shift
+  const today = new Date();
+  document.getElementById('newShiftDate').value = today.toISOString().split('T')[0];
+
+  // האזן לשינויים בזמן אמת
+  db.ref(`${ROOT}/volunteers`).on('value', snap => {
+    VOLUNTEERS = snap.val() || {};
+    renderVolunteers();
+  });
+  db.ref(`${ROOT}/shifts`).on('value', snap => {
+    SHIFTS_RAW = snap.val() || {};
+    if (openPanel) refreshPanel(getShiftObj(openPanel));
+    renderAdminShifts();
+  });
+  db.ref(`${ROOT}/registrations`).on('value', snap => {
+    REGISTRATIONS = snap.val() || {};
+    if (openPanel) refreshPanel(getShiftObj(openPanel));
+    renderAdminShifts();
+  });
+  db.ref(`${ROOT}/swapRequests`).on('value', snap => {
+    SWAP_REQUESTS = snap.val() || {};
+    if (openPanel) refreshPanel(getShiftObj(openPanel));
+    renderAdminShifts();
+  });
+}
+
+// ════════════════════════════════════════════
+//  RENDER SHIFTS
+// ════════════════════════════════════════════
+
+function renderAdminShifts() {
+  const list = document.getElementById('adminShiftsList');
+  list.innerHTML = '';
+
+  document.getElementById('adminMonthLabel').innerHTML =
+    `${HEBREW_MONTHS[viewMonth]} <span>${viewYear}</span>`;
+
+  const monthShifts = getShiftsSorted()
+    .filter(s => { const d = new Date(s.date); return d.getFullYear()===viewYear && d.getMonth()===viewMonth; });
+
+  if (monthShifts.length === 0) {
+    list.innerHTML = `<div class="empty-msg">אין משמרות לחודש זה. הוסף משמרת בלשונית "משמרת חדשה".</div>`;
+    return;
+  }
+
+  monthShifts.forEach(shift => list.appendChild(buildAdminCard(shift)));
+}
+
+function buildAdminCard(shift) {
+  const d        = new Date(shift.date);
+  const dayName  = DAY_NAMES[d.getDay()] || '';
+  const dayNum   = d.getDate();
+  const mon      = MONTH_SHORT[d.getMonth()];
+
+  // slots chips
+  const chipsHTML = buildSlotChips(shift);
+
+  const card = document.createElement('div');
+  card.className = 'shift-admin-card';
+  card.dataset.id = shift.id;
+
+  card.innerHTML = `
+    <div class="shift-admin-header">
+      <div class="shift-date-block">
+        <div class="shift-day-name">${dayName}</div>
+        <div class="shift-day-num">${dayNum}</div>
+        <div class="shift-month">${mon}</div>
+      </div>
+      <div style="width:1px;height:44px;background:var(--border);flex-shrink:0"></div>
+      <div class="shift-admin-info">
+        <div class="shift-admin-title">
+          ${shift.type==='special' ? `⭐ ${shift.label||'ערב מיוחד'}` : 'משמרת רגילה'}
+        </div>
+        <div class="shift-slots-summary">${chipsHTML}</div>
+      </div>
+      <div style="color:var(--text-dim);font-size:1.1rem">›</div>
+    </div>
+    <div class="shift-admin-panel" id="apanel-${shift.id}">
+      <div class="panel-inner" id="apanel-inner-${shift.id}"></div>
+    </div>
+  `;
+
+  card.querySelector('.shift-admin-header').addEventListener('click', () => togglePanel(shift));
+
+  return card;
+}
+
+function buildSlotChips(shift) {
+  const chips = [];
+  shift.registered.forEach(vid => {
+    const v = VOLUNTEERS[vid];
+    const isAchmash = shift.achmash === vid;
+    chips.push(`<span class="slot-chip ${isAchmash?'chip-achmash':'chip-filled'}">${v?.name||'?'}${isAchmash?' ★':''}</span>`);
+  });
+  const empty = shift.maxSlots - shift.registered.length;
+  for (let i = 0; i < empty; i++) chips.push(`<span class="slot-chip chip-empty">פנוי</span>`);
+  return chips.join('');
+}
+
+function togglePanel(shift) {
+  const panel = document.getElementById(`apanel-${shift.id}`);
+  const inner = document.getElementById(`apanel-inner-${shift.id}`);
+
+  if (openPanel && openPanel !== shift.id) {
+    const prev = document.getElementById(`apanel-${openPanel}`);
+    if (prev) prev.classList.remove('open');
+  }
+
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    openPanel = null;
+    return;
+  }
+
+  // בנה את תוכן הפאנל
+  inner.innerHTML = buildPanelContent(shift);
+  bindPanelEvents(inner, shift);
+  panel.classList.add('open');
+  openPanel = shift.id;
+}
+
+function buildPanelContent(shift) {
+  // רשימת רשומים
+  const regRows = shift.registered.length === 0
+    ? `<div style="font-size:0.8rem;color:var(--text-dim)">אין רשומים עדיין</div>`
+    : shift.registered.map(vid => {
+        const v = VOLUNTEERS[vid];
+        const isAchmash = shift.achmash === vid;
+        const hasSwap   = shift.swapRequests.includes(vid);
+        return `
+          <div class="reg-row">
+            <span class="reg-name">
+              ${v?.name||'?'}
+              ${isAchmash ? '<span class="achmash-badge">אחמ"א</span>' : ''}
+              ${hasSwap   ? '<span style="font-size:0.72rem;color:var(--amber)">🔄 מחליף?</span>' : ''}
+            </span>
+            <button class="btn btn-sm btn-ghost" data-action="set-achmash" data-vid="${vid}">
+              ${isAchmash ? '★ אחמ"א' : 'מנה אחמ"א'}
+            </button>
+            <button class="btn btn-sm btn-danger" data-action="remove-vol" data-vid="${vid}">✕</button>
+          </div>`;
+      }).join('');
+
+  // dropdown להוספה
+  const available = Object.entries(VOLUNTEERS)
+    .filter(([vid]) => !shift.registered.includes(vid))
+    .map(([vid, v]) => `<option value="${vid}">${v.name}${v.isAchmash?' (אחמ"א)':''}</option>`)
+    .join('');
+
+  const addSection = available
+    ? `<div class="panel-section">
+        <div class="panel-section-title">הוסף מתנדב</div>
+        <div class="add-to-shift">
+          <select id="addVolSelect-${shift.id}">
+            <option value="">— בחר מתנדב —</option>
+            ${available}
+          </select>
+          <button class="btn btn-primary btn-sm" data-action="add-vol">הוסף</button>
+        </div>
+       </div>`
+    : `<div style="font-size:0.78rem;color:var(--text-dim)">כל המתנדבים כבר רשומים</div>`;
+
+  // הערה
+  const noteVal = shift.note || '';
+
+  return `
+    <div class="panel-section">
+      <div class="panel-section-title">מתנדבים רשומים</div>
+      <div class="reg-list">${regRows}</div>
+    </div>
+    ${addSection}
+    <div class="divider"></div>
+    <div class="panel-section">
+      <div class="panel-section-title">📋 הערת משמרת</div>
+      <textarea id="noteEdit-${shift.id}" placeholder="הוספת הערה...">${noteVal}</textarea>
+      <button class="btn btn-ghost btn-sm" data-action="save-note" style="align-self:flex-start">שמור הערה</button>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-danger btn-sm" data-action="delete-shift">🗑 מחק משמרת</button>
+    </div>
+  `;
+}
+
+function bindPanelEvents(inner, shift) {
+  inner.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const action = el.dataset.action;
+      const vid    = el.dataset.vid;
+
+      if (action === 'remove-vol') {
+        await db.ref(`${ROOT}/registrations/${shift.id}/${vid}`).remove();
+        await db.ref(`${ROOT}/swapRequests/${shift.id}/${vid}`).remove();
+        if (shift.achmash === vid) await db.ref(`${ROOT}/shifts/${shift.id}/achmash`).set(null);
+        showToast(`${VOLUNTEERS[vid]?.name} הוסר/ה מהמשמרת`);
+      }
+
+      if (action === 'set-achmash') {
+        const newVal = shift.achmash === vid ? null : vid;
+        await db.ref(`${ROOT}/shifts/${shift.id}/achmash`).set(newVal);
+        const name = VOLUNTEERS[vid]?.name;
+        showToast(newVal ? `${name} מונה/תה לאחמ"א` : `${name} הוסר מתפקיד אחמ"א`, 'success');
+      }
+
+      if (action === 'add-vol') {
+        const sel = document.getElementById(`addVolSelect-${shift.id}`);
+        const newVid = sel?.value;
+        if (!newVid) return showToast('בחר מתנדב', 'error');
+        if (shift.registered.length >= shift.maxSlots) return showToast('המשמרת מלאה', 'error');
+        await db.ref(`${ROOT}/registrations/${shift.id}/${newVid}`).set(Date.now());
+        showToast(`${VOLUNTEERS[newVid]?.name} נוסף/ה למשמרת`, 'success');
+      }
+
+      if (action === 'save-note') {
+        const ta = document.getElementById(`noteEdit-${shift.id}`);
+        const note = ta?.value.trim() || null;
+        await db.ref(`${ROOT}/shifts/${shift.id}/note`).set(note);
+        showToast('הערה נשמרה ✓', 'success');
+      }
+
+      if (action === 'delete-shift') {
+        if (!confirm('למחוק את המשמרת הזו לגמרי?')) return;
+        await db.ref(`${ROOT}/shifts/${shift.id}`).remove();
+        await db.ref(`${ROOT}/registrations/${shift.id}`).remove();
+        await db.ref(`${ROOT}/swapRequests/${shift.id}`).remove();
+        openPanel = null;
+        showToast('המשמרת נמחקה', 'success');
+      }
+    });
+  });
+}
+
+function refreshPanel(shift) {
+  const inner = document.getElementById(`apanel-inner-${shift.id}`);
+  if (!inner) return;
+  inner.innerHTML = buildPanelContent(shift);
+  bindPanelEvents(inner, shift);
+}
+
+// ════════════════════════════════════════════
+//  RENDER VOLUNTEERS
+// ════════════════════════════════════════════
+
+function renderVolunteers() {
+  const list  = document.getElementById('volList');
+  const count = document.getElementById('volCount');
+  const vols  = Object.entries(VOLUNTEERS);
+
+  count.textContent = `${vols.length} מתנדבים`;
+  list.innerHTML = '';
+
+  vols.forEach(([vid, v]) => {
+    const card = document.createElement('div');
+    card.className = 'vol-card';
+    const initials = v.name.charAt(0);
+
+    // generate volunteer link
+    const link = `${location.origin}${location.pathname.replace('admin.html','index.html')}?vid=${vid}`;
+
+    card.innerHTML = `
+      <div class="vol-avatar">${initials}</div>
+      <div class="vol-info">
+        <div class="vol-name">
+          ${v.name}
+          ${v.isAchmash ? '<span class="achmash-badge">אחמ"א</span>' : ''}
+        </div>
+        <div class="vol-phone">${v.phone}</div>
+        <div class="link-box" style="margin-top:6px">
+          <span id="link-${vid}">${link}</span>
+          <button class="copy-btn" onclick="copyLink('${vid}','${link}')">העתק</button>
+        </div>
+      </div>
+      <div class="vol-actions">
+        <button class="btn btn-sm btn-ghost" onclick="toggleAchmash('${vid}')">
+          ${v.isAchmash ? '★' : '☆'}
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="removeVolunteer('${vid}')">✕</button>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
+async function addVolunteer() {
+  const name  = document.getElementById('newVolName').value.trim();
+  const phone = document.getElementById('newVolPhone').value.trim();
+  const isAchmash = document.getElementById('newVolAchmash').checked;
+
+  if (!name) return showToast('הכנס שם', 'error');
+
+  await db.ref(`${ROOT}/volunteers`).push({ name, phone, isAchmash });
+
+  document.getElementById('newVolName').value  = '';
+  document.getElementById('newVolPhone').value = '';
+  document.getElementById('newVolAchmash').checked = false;
+
+  showToast(`${name} נוסף/ה ✓`, 'success');
+}
+
+async function removeVolunteer(vid) {
+  const name = VOLUNTEERS[vid]?.name;
+  if (!confirm(`להסיר את ${name} מרשימת המתנדבים?`)) return;
+  await db.ref(`${ROOT}/volunteers/${vid}`).remove();
+  showToast(`${name} הוסר/ה`, 'success');
+}
+
+async function toggleAchmash(vid) {
+  const newVal = !VOLUNTEERS[vid].isAchmash;
+  await db.ref(`${ROOT}/volunteers/${vid}/isAchmash`).set(newVal);
+  showToast(`${VOLUNTEERS[vid].name} — ${newVal ? 'סומן/ה כאחמ"א' : 'הוסר מאחמ"א'}`, 'success');
+}
+
+function copyLink(vid, link) {
+  navigator.clipboard.writeText(link).then(() => showToast('הלינק הועתק ✓', 'success'));
+}
+
+// ════════════════════════════════════════════
+//  ADD SHIFT
+// ════════════════════════════════════════════
+
+function toggleSpecialLabel() {
+  const isSpecial = document.getElementById('newShiftSpecial').checked;
+  document.getElementById('specialLabelGroup').style.display = isSpecial ? 'flex' : 'none';
+}
+
+function addShift() {
+  const date  = document.getElementById('newShiftDate').value;
+  const min   = parseInt(document.getElementById('newShiftMin').value);
+  const max   = parseInt(document.getElementById('newShiftMax').value);
+  const special = document.getElementById('newShiftSpecial').checked;
+  const label = document.getElementById('newShiftLabel').value.trim();
+  const note  = document.getElementById('newShiftNote').value.trim();
+
+  if (!date) return showToast('בחר תאריך', 'error');
+  if (min > max) return showToast('מינימום לא יכול לעלות על מקסימום', 'error');
+
+  await db.ref(`${ROOT}/shifts`).push({
+    date,
+    type: special ? 'special' : 'regular',
+    label: special ? (label || 'ערב מיוחד') : null,
+    minSlots: min, maxSlots: max,
+    achmash: null,
+    note: note || null,
+  });
+
+  // עבור לחודש שנבחר
+  const d = new Date(date);
+  viewYear  = d.getFullYear();
+  viewMonth = d.getMonth();
+
+  showToast('המשמרת נוספה ✓', 'success');
+  document.getElementById('newShiftNote').value  = '';
+  document.getElementById('newShiftLabel').value = '';
+  document.getElementById('newShiftSpecial').checked = false;
+  document.getElementById('specialLabelGroup').style.display = 'none';
+
+  // עבור לטאב משמרות
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-tab="shifts"]').classList.add('active');
+  document.getElementById('tab-shifts').classList.add('active');
+  renderAdminShifts();
+}
+
+// ════════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════════
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  if (localStorage.getItem('btdr_admin_auth') === 'ok') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display    = 'block';
+    init();
+  }
+});
+</script>
+</body>
+</html>
