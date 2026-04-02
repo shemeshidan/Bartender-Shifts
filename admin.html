@@ -1157,7 +1157,7 @@ function toggleSpecialLabel() {
   document.getElementById('specialLabelGroup').style.display = isSpecial ? 'flex' : 'none';
 }
 
-function addShift() {
+async function addShift() {
   const date  = document.getElementById('newShiftDate').value;
   const min   = parseInt(document.getElementById('newShiftMin').value);
   const max   = parseInt(document.getElementById('newShiftMax').value);
