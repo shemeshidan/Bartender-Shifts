@@ -252,7 +252,7 @@
     .card-type {
       font-size: 0.72rem;
       letter-spacing: 1.5px;
-      color: var(--gold);
+      color: var(--text);
       text-transform: uppercase;
       font-weight: 700;
       margin-bottom: 6px;
@@ -267,13 +267,12 @@
     .slot {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 4px;
-      background: var(--card2);
-      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 4px 8px;
-      font-size: 0.72rem;
-      color: var(--text-dim);
+      font-size: 0.75rem;
+      font-weight: 700;
       flex: 1;
       min-width: 0;
       white-space: nowrap;
@@ -282,16 +281,15 @@
     }
 
     .slot.filled {
-      border-color: rgba(76,175,125,0.4);
+      border: 1px solid rgba(76,175,125,0.4);
       color: var(--green);
       background: var(--green-bg);
     }
 
     .slot.filled-me {
-      border-color: var(--gold);
+      border: 1px solid var(--gold);
       color: var(--gold);
       background: var(--gold-glow);
-      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -303,13 +301,15 @@
     }
 
     .slot.swap-needed {
-      border-color: rgba(201,168,76,0.5);
+      border: 1px solid rgba(201,168,76,0.5);
       color: var(--gold);
       background: var(--gold-glow);
     }
 
     .slot.empty {
-      border-style: dashed;
+      border: 1px dashed rgba(224,82,82,0.4);
+      color: var(--red);
+      background: var(--red-bg);
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -319,8 +319,6 @@
       color: var(--gold);
       background: var(--gold-glow);
     }
-
-    .slot-icon { font-size: 0.85rem; }
 
     .card-bottom {
       display: flex;
@@ -932,7 +930,7 @@ function buildSlots(shift) {
   for (let i = 0; i < shift.maxSlots; i++) {
     const volId = shift.registered[i];
     if (!volId) {
-      slots.push(`<div class="slot empty" data-action="register"><span class="slot-icon">+</span> פנוי</div>`);
+      slots.push(`<div class="slot empty" data-action="register">פנוי</div>`);
     } else {
       const vol = VOLUNTEERS[volId];
       const isMe = volId === currentVolId;
