@@ -957,7 +957,7 @@ function buildSlots(shift) {
       if (swapReq) { icon = '🔄'; name += ' (מחליף?)'; }
       const meAttr = isMe ? ' data-action="cancel-reg"' : '';
       const swapAttr = isMe && !swapReq ? ' title="לחץ לבקשת החלפה"' : '';
-      slots.push(`<div class="slot ${cls}"${meAttr}${swapAttr}><span class="slot-icon">${icon}</span>${name}${isAchmash ? ' · אחמ"א' : ''}</div>`);
+      slots.push(`<div class="slot ${cls}"${meAttr}${swapAttr}><span class="slot-icon">${icon}</span>${name}</div>`);
     }
   }
   return slots.join('');
