@@ -1106,19 +1106,12 @@ function openActionModal(shift) {
     b.onclick = () => { closeActionModal(); handleAction('cancel-swap', shift); };
     btns.appendChild(b);
   } else {
-    const b1 = document.createElement('button');
-    b1.className = 'btn btn-danger';
-    b1.textContent = '🔄 בקש החלפה';
-    b1.onclick = () => { closeActionModal(); handleAction('swap', shift); };
-    btns.appendChild(b1);
-
-    if (canCancel) {
-      const b2 = document.createElement('button');
-      b2.className = 'btn btn-ghost';
-      b2.textContent = '↩ בטל רישום';
-      b2.onclick = () => { closeActionModal(); handleAction('cancel-reg', shift); };
-      btns.appendChild(b2);
-    }
+    // אחרי שעה — בקשת החלפה בלבד
+    const b = document.createElement('button');
+    b.className = 'btn btn-danger';
+    b.textContent = '🔄 בקש החלפה';
+    b.onclick = () => { closeActionModal(); handleAction('swap', shift); };
+    btns.appendChild(b);
   }
 
   document.getElementById('actionModal').classList.add('open');
