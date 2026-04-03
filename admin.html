@@ -1094,20 +1094,29 @@ function renderVolunteers() {
     card.innerHTML = `
       <div class="vol-avatar">${initials}</div>
       <div class="vol-info">
-        <div class="vol-name">
+        <div class="vol-name" id="vol-display-${vid}">
           ${v.name}
           ${v.isAchmash ? '<span class="achmash-badge">אחמ"א</span>' : ''}
         </div>
-        <div class="vol-phone">${v.phone}</div>
+        <div class="vol-phone">${v.phone || '—'}</div>
         <div class="link-box" style="margin-top:6px">
           <span id="link-${vid}">${link}</span>
           <button class="copy-btn" onclick="copyLink('${vid}','${link}')">העתק</button>
+        </div>
+        <div class="vol-edit-form" id="vol-edit-${vid}" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:8px">
+          <input type="text" id="edit-name-${vid}" value="${v.name}" placeholder="שם" />
+          <input type="tel" id="edit-phone-${vid}" value="${v.phone || ''}" placeholder="050-0000000" />
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" onclick="saveVolunteer('${vid}')">שמור</button>
+            <button class="btn btn-ghost btn-sm" onclick="cancelEdit('${vid}')">ביטול</button>
+          </div>
         </div>
       </div>
       <div class="vol-actions">
         <button class="btn btn-sm btn-ghost" onclick="toggleAchmash('${vid}')">
           ${v.isAchmash ? '★' : '☆'}
         </button>
+        <button class="btn btn-sm btn-ghost" onclick="startEdit('${vid}')">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="removeVolunteer('${vid}')">✕</button>
       </div>
     `;
@@ -1137,6 +1146,22 @@ async function removeVolunteer(vid) {
   if (!confirm(`להסיר את ${name} מרשימת המתנדבים?`)) return;
   await db.ref(`${ROOT}/volunteers/${vid}`).remove();
   showToast(`${name} הוסר/ה`, 'success');
+}
+
+function startEdit(vid) {
+  document.getElementById(`vol-edit-${vid}`).style.display = 'flex';
+}
+
+function cancelEdit(vid) {
+  document.getElementById(`vol-edit-${vid}`).style.display = 'none';
+}
+
+async function saveVolunteer(vid) {
+  const name  = document.getElementById(`edit-name-${vid}`).value.trim();
+  const phone = document.getElementById(`edit-phone-${vid}`).value.trim();
+  if (!name) return showToast('שם לא יכול להיות ריק', 'error');
+  await db.ref(`${ROOT}/volunteers/${vid}`).update({ name, phone });
+  showToast(`${name} עודכן/ה ✓`, 'success');
 }
 
 async function toggleAchmash(vid) {
