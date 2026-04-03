@@ -912,23 +912,25 @@ function buildCard(shift) {
     });
   });
 
-  // לחיצה ישירה על slot פנוי
-  card.querySelectorAll('.slot.empty[data-action]').forEach(slot => {
-    slot.addEventListener('click', e => {
-      e.stopPropagation();
-      handleAction('register', shift);
+  // לחיצה ישירה על slot פנוי — רק למשמרות עתידיות
+  if (!isPast) {
+    card.querySelectorAll('.slot.empty[data-action]').forEach(slot => {
+      slot.addEventListener('click', e => {
+        e.stopPropagation();
+        handleAction('register', shift);
+      });
     });
-  });
 
-  // לחיצה על ה-slot שלי — רק אחרי שעה
-  card.querySelectorAll('.slot.filled-me[data-action]').forEach(slot => {
-    slot.addEventListener('click', e => {
-      e.stopPropagation();
-      const ts = shift.registeredAt?.[currentVolId];
-      const elapsed = ts ? Date.now() - ts : Infinity;
-      if (elapsed > CANCEL_WINDOW_MS) openActionModal(shift);
+    // לחיצה על ה-slot שלי — רק אחרי שעה
+    card.querySelectorAll('.slot.filled-me[data-action]').forEach(slot => {
+      slot.addEventListener('click', e => {
+        e.stopPropagation();
+        const ts = shift.registeredAt?.[currentVolId];
+        const elapsed = ts ? Date.now() - ts : Infinity;
+        if (elapsed > CANCEL_WINDOW_MS) openActionModal(shift);
+      });
     });
-  });
+  }
 
   // כפתורי פעולה
   bindActionBtns(card, shift);
