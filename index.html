@@ -885,7 +885,7 @@ function buildCard(shift) {
             ${shift.note}
           </div>
         ` : ''}
-        ${isPast && isMine ? `
+        ${isPast ? `
           <div class="expand-note" style="border-color:rgba(76,175,125,0.25);background:rgba(76,175,125,0.06)">
             <div class="expand-note-label" style="color:var(--green)">📝 סיכום משמרת</div>
             <textarea id="summary-${shift.id}" placeholder="חוסרים, תקלות, הערות..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:Heebo,sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-top:4px;min-height:60px">${shift.summary || ''}</textarea>
@@ -899,8 +899,8 @@ function buildCard(shift) {
     </div>
   `;
 
-  // לחיצה על הכרטיס — פתיחת panel (רק אם יש סיכום/הערות לכתיבה)
-  if (isPast && isMine) {
+  // לחיצה על הכרטיס — פתיחת panel מיום המשמרת ואילך
+  if (isPast) {
     card.querySelector('.card-main').addEventListener('click', () => toggleExpand(shift.id));
   }
 
