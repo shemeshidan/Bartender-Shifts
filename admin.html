@@ -973,7 +973,7 @@ function buildPanelContent(shift) {
 
   // dropdown להוספה
   const available = Object.entries(VOLUNTEERS)
-    .filter(([vid]) => !shift.registered.includes(vid))
+    .filter(([vid, v]) => !shift.registered.includes(vid) && v.active !== false)
     .map(([vid, v]) => `<option value="${vid}">${v.name}${v.isAchmash?' (אחמ"א)':''}</option>`)
     .join('');
 
@@ -1006,6 +1006,14 @@ function buildPanelContent(shift) {
       <div class="panel-section-title">📋 הערת משמרת (לפני)</div>
       <textarea id="noteEdit-${shift.id}" placeholder="הוראות, שינוי שעות...">${noteVal}</textarea>
       <button class="btn btn-ghost btn-sm" data-action="save-note" style="align-self:flex-start">שמור הערה</button>
+    </div>
+    <div class="divider"></div>
+    <div class="panel-section">
+      <div class="panel-section-title">📅 שינוי תאריך</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="date" id="dateEdit-${shift.id}" value="${shift.date}" style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:0.85rem" />
+        <button class="btn btn-ghost btn-sm" data-action="save-date">שמור תאריך</button>
+      </div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1051,6 +1059,14 @@ function bindPanelEvents(inner, shift) {
         showToast('הערה נשמרה ✓', 'success');
       }
 
+      if (action === 'save-date') {
+        const inp = document.getElementById(`dateEdit-${shift.id}`);
+        const newDate = inp?.value;
+        if (!newDate) return showToast('בחר תאריך', 'error');
+        await db.ref(`${ROOT}/shifts/${shift.id}/date`).set(newDate);
+        showToast('התאריך עודכן ✓', 'success');
+      }
+
 
       if (action === 'delete-shift') {
         if (!confirm('למחוק את המשמרת הזו לגמרי?')) return;
@@ -1094,9 +1110,10 @@ function renderVolunteers() {
     card.innerHTML = `
       <div class="vol-avatar">${initials}</div>
       <div class="vol-info">
-        <div class="vol-name" id="vol-display-${vid}">
+        <div class="vol-name" id="vol-display-${vid}" style="${v.active === false ? 'opacity:0.5' : ''}">
           ${v.name}
           ${v.isAchmash ? '<span class="achmash-badge">אחמ"א</span>' : ''}
+          ${v.active === false ? '<span style="font-size:0.65rem;background:rgba(224,82,82,0.15);border:1px solid rgba(224,82,82,0.3);color:var(--red);border-radius:8px;padding:1px 7px;font-weight:700">HOLD</span>' : ''}
         </div>
         <div class="vol-phone">${v.phone || '—'}</div>
         <div class="link-box" style="margin-top:6px">
@@ -1117,6 +1134,9 @@ function renderVolunteers() {
           ${v.isAchmash ? '★' : '☆'}
         </button>
         <button class="btn btn-sm btn-ghost" onclick="startEdit('${vid}')">✏️</button>
+        <button class="btn btn-sm ${v.active === false ? 'btn-primary' : 'btn-ghost'}" onclick="toggleHold('${vid}')" title="${v.active === false ? 'החזר פעיל' : 'שים על Hold'}">
+          ${v.active === false ? '▶' : '⏸'}
+        </button>
         <button class="btn btn-sm btn-danger" onclick="removeVolunteer('${vid}')">✕</button>
       </div>
     `;
@@ -1162,6 +1182,12 @@ async function saveVolunteer(vid) {
   if (!name) return showToast('שם לא יכול להיות ריק', 'error');
   await db.ref(`${ROOT}/volunteers/${vid}`).update({ name, phone });
   showToast(`${name} עודכן/ה ✓`, 'success');
+}
+
+async function toggleHold(vid) {
+  const isOnHold = VOLUNTEERS[vid].active === false;
+  await db.ref(`${ROOT}/volunteers/${vid}/active`).set(isOnHold ? true : false);
+  showToast(`${VOLUNTEERS[vid].name} — ${isOnHold ? 'הוחזר/ה לפעיל' : 'הועבר/ה ל-Hold'}`, 'success');
 }
 
 async function toggleAchmash(vid) {
