@@ -1026,7 +1026,27 @@ async function handleAction(action, shift) {
 
   if (action === 'swap') {
     await db.ref(`${ROOT}/swapRequests/${shift.id}/${currentVolId}`).set(true);
-    showToast('🔄 בקשת ההחלפה נשלחה לכל המתנדבים.', 'success');
+
+    // שלח התראת ווצאפ לכל המתנדבים האחרים
+    const d = new Date(shift.date);
+    const dateStr = `${d.getDate()}/${d.getMonth()+1}`;
+    const phones = Object.entries(VOLUNTEERS)
+      .filter(([vid, v]) => vid !== currentVolId && v.phone)
+      .map(([, v]) => v.phone);
+    const link = `${location.origin}${location.pathname}?vid=`;
+
+    fetch('https://bartender-shifts-server.onrender.com/notify-swap', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requesterName: currentVol.name,
+        shiftDate: dateStr,
+        link: `https://shemeshidan.github.io/Bartender-Shifts/index.html`,
+        phones,
+      })
+    }).catch(e => console.warn('notify error:', e));
+
+    showToast('🔄 בקשת ההחלפה נשלחה לכל המתנדבים בוואטסאפ.', 'success');
     closeExpand(shift.id);
     return;
   }
