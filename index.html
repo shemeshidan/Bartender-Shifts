@@ -325,24 +325,9 @@
     .card-bottom {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       margin-top: 8px;
     }
-
-    .status-pill {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      border-radius: 12px;
-      padding: 3px 10px;
-      white-space: nowrap;
-    }
-
-    .pill-full    { background: var(--green-bg);  color: var(--green); border: 1px solid rgba(76,175,125,0.3); }
-    .pill-partial { background: var(--amber-bg);  color: var(--amber); border: 1px solid rgba(232,148,58,0.3); }
-    .pill-empty   { background: var(--red-bg);    color: var(--red);   border: 1px solid rgba(224,82,82,0.3); }
-    .pill-swap    { background: var(--gold-glow); color: var(--gold);  border: 1px solid rgba(201,168,76,0.4); }
-    .pill-mine    { background: var(--gold-glow); color: var(--gold);  border: 1px solid var(--gold); }
 
     .note-btn {
       width: 28px;
@@ -656,12 +641,6 @@
     <button class="nav-btn" id="nextMonth">›</button>
   </div>
 
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> מאויש</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> נדרשים עוד</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> פתוח לרישום</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> בקשת החלפה</div>
-  </div>
 
   <div id="shiftsList"></div>
 
@@ -751,6 +730,14 @@ async function init() {
     return;
   }
 
+  if (vol.active === false) {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('notFoundScreen').style.display = 'flex';
+    document.querySelector('#notFoundScreen h2').textContent = 'גישה מושהית';
+    document.querySelector('#notFoundScreen p').textContent = 'הגישה שלך מושהית זמנית. פנה למנהלת לפרטים.';
+    return;
+  }
+
   localStorage.setItem('btdr_shift_vid', vid);
   currentVolId = vid;
   currentVol   = vol;
@@ -817,11 +804,6 @@ function renderShifts() {
   });
 
   Object.keys(weeks).sort().forEach(wk => {
-    const wLabel = document.createElement('div');
-    wLabel.className = 'week-label';
-    wLabel.textContent = `שבוע ${parseInt(wk) + 1 - getWeekNumber(new Date(viewYear, viewMonth, 1))}`;
-    list.appendChild(wLabel);
-
     weeks[wk].forEach(shift => {
       list.appendChild(buildCard(shift));
     });
@@ -866,6 +848,11 @@ function buildCard(shift) {
   card.className = `shift-card ${statusClass}`;
   card.dataset.id = shift.id;
 
+  const icons = `
+    ${hasNote    ? `<div class="note-btn" data-id="${shift.id}" data-type="note">📋</div>` : ''}
+    ${hasSummary ? `<div class="note-btn" data-id="${shift.id}" data-type="summary" style="background:rgba(76,175,125,0.15);border-color:rgba(76,175,125,0.4);color:var(--green)">📝</div>` : ''}
+  `;
+
   card.innerHTML = `
     <div class="card-main">
       <div class="card-date">
@@ -873,18 +860,15 @@ function buildCard(shift) {
         <div class="card-day-num">${dayNum}</div>
         <div class="card-month-short">${monthShort}</div>
       </div>
-      <div class="card-divider"></div>
+      <div style="width:1px;height:44px;background:var(--border);flex-shrink:0"></div>
       <div class="card-info">
         <div class="card-type">
           ${shift.type === 'special' ? `⭐ ${shift.label || 'ערב מיוחד'}` : 'משמרת רגילה'}
         </div>
         <div class="card-slots">${slotsHTML}</div>
-        <div class="card-bottom">
-          <div class="status-pill ${pillClass}">${pillText}</div>
-          ${hasNote    ? `<div class="note-btn" data-id="${shift.id}" data-type="note">📋</div>` : ''}
-          ${hasSummary ? `<div class="note-btn" data-id="${shift.id}" data-type="summary" style="background:rgba(76,175,125,0.15);border-color:rgba(76,175,125,0.4);color:var(--green)">📝</div>` : ''}
-        </div>
+        ${(hasNote || hasSummary) ? `<div class="card-bottom">${icons}</div>` : ''}
       </div>
+      ${(hasNote || hasSummary) ? '' : ''}
     </div>
     <div class="card-expand" id="expand-${shift.id}">
       <div class="expand-inner">
@@ -908,8 +892,10 @@ function buildCard(shift) {
     </div>
   `;
 
-  // לחיצה על הכרטיס — פתיחת panel
-  card.querySelector('.card-main').addEventListener('click', () => toggleExpand(shift.id));
+  // לחיצה על הכרטיס — פתיחת panel (רק אם יש סיכום/הערות לכתיבה)
+  if (isPast && isMine) {
+    card.querySelector('.card-main').addEventListener('click', () => toggleExpand(shift.id));
+  }
 
   // כפתורי הערה/סיכום
   card.querySelectorAll('.note-btn').forEach(btn => {
@@ -957,7 +943,8 @@ function buildSlots(shift) {
       let name = isMe ? 'את/ה' : (vol ? vol.name : '?');
       if (swapReq) { icon = '🔄'; name += ' (מחליף?)'; }
       const meAttr = isMe ? ' data-action="cancel-reg"' : '';
-      slots.push(`<div class="slot ${cls}"${meAttr}><span class="slot-icon">${icon}</span>${name}${isAchmash ? ' · אחמ"א' : ''}</div>`);
+      const swapAttr = isMe && !swapReq ? ' title="לחץ לבקשת החלפה"' : '';
+      slots.push(`<div class="slot ${cls}"${meAttr}${swapAttr}><span class="slot-icon">${icon}</span>${name}${isAchmash ? ' · אחמ"א' : ''}</div>`);
     }
   }
   return slots.join('');
