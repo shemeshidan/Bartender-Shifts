@@ -829,7 +829,9 @@ function buildCard(shift) {
   const isFull     = shift.registered.length >= shift.maxSlots;
   const hasNote    = !!shift.note;
   const hasSummary = !!shift.summary;
-  const isPast     = new Date(shift.date) <= new Date(new Date().toDateString());
+  const _now = new Date();
+  const todayStr = `${_now.getFullYear()}-${String(_now.getMonth()+1).padStart(2,'0')}-${String(_now.getDate()).padStart(2,'0')}`;
+  const isPast     = shift.date <= todayStr;
 
   // סטטוס
   let statusClass, pillClass, pillText;
