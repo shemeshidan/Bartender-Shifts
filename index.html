@@ -839,6 +839,8 @@ function buildCard(shift) {
   const hasSwapReq = shift.swapRequests.length > 0;
   const isFull     = shift.registered.length >= shift.maxSlots;
   const hasNote    = !!shift.note;
+  const hasSummary = !!shift.summary;
+  const isPast     = new Date(shift.date) <= new Date(new Date().toDateString());
 
   // סטטוס
   let statusClass, pillClass, pillText;
@@ -879,7 +881,8 @@ function buildCard(shift) {
         <div class="card-slots">${slotsHTML}</div>
         <div class="card-bottom">
           <div class="status-pill ${pillClass}">${pillText}</div>
-          ${hasNote ? `<div class="note-btn" data-id="${shift.id}">📋</div>` : ''}
+          ${hasNote    ? `<div class="note-btn" data-id="${shift.id}" data-type="note">📋</div>` : ''}
+          ${hasSummary ? `<div class="note-btn" data-id="${shift.id}" data-type="summary" style="background:rgba(76,175,125,0.15);border-color:rgba(76,175,125,0.4);color:var(--green)">📝</div>` : ''}
         </div>
       </div>
     </div>
@@ -891,8 +894,15 @@ function buildCard(shift) {
             ${shift.note}
           </div>
         ` : ''}
+        ${isPast && isMine ? `
+          <div class="expand-note" style="border-color:rgba(76,175,125,0.25);background:rgba(76,175,125,0.06)">
+            <div class="expand-note-label" style="color:var(--green)">📝 סיכום משמרת</div>
+            <textarea id="summary-${shift.id}" placeholder="חוסרים, תקלות, הערות..." style="width:100%;background:transparent;border:none;color:var(--text);font-family:Heebo,sans-serif;font-size:0.85rem;resize:vertical;outline:none;margin-top:4px;min-height:60px">${shift.summary || ''}</textarea>
+            <button class="btn btn-ghost" data-action="save-summary" style="margin-top:6px;flex:unset;padding:6px 14px;font-size:0.78rem">שמור סיכום</button>
+          </div>
+        ` : ''}
         <div class="action-btns">
-          ${buildActionBtns(shift, isMine, wantsSwap, isFull, hasSwapReq)}
+          ${buildActionBtns(shift, isMine, wantsSwap, isFull, hasSwapReq, isPast)}
         </div>
       </div>
     </div>
@@ -901,14 +911,13 @@ function buildCard(shift) {
   // לחיצה על הכרטיס — פתיחת panel
   card.querySelector('.card-main').addEventListener('click', () => toggleExpand(shift.id));
 
-  // כפתור הערה עצור propagation
-  const noteBtn = card.querySelector('.note-btn');
-  if (noteBtn) {
-    noteBtn.addEventListener('click', e => {
+  // כפתורי הערה/סיכום
+  card.querySelectorAll('.note-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
       e.stopPropagation();
-      openNoteModal(shift);
+      openNoteModal(shift, btn.dataset.type);
     });
-  }
+  });
 
   // לחיצה ישירה על slot פנוי
   card.querySelectorAll('.slot.empty[data-action]').forEach(slot => {
@@ -927,7 +936,7 @@ function buildCard(shift) {
   });
 
   // כפתורי פעולה
-  bindActionBtns(card, shift, isMine, wantsSwap, isFull, hasSwapReq);
+  bindActionBtns(card, shift);
 
   return card;
 }
@@ -973,7 +982,7 @@ function buildActionBtns(shift, isMine, wantsSwap, isFull, hasSwapReq) {
   return `<button class="btn btn-ghost" disabled>המשמרת מאוישת</button>`;
 }
 
-function bindActionBtns(card, shift, isMine, wantsSwap, isFull, hasSwapReq) {
+function bindActionBtns(card, shift) {
   card.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
@@ -1027,6 +1036,13 @@ async function handleAction(action, shift) {
     showToast('✕ בקשת ההחלפה בוטלה', 'success');
     closeExpand(shift.id);
   }
+
+  if (action === 'save-summary') {
+    const ta = document.getElementById(`summary-${shift.id}`);
+    const summary = ta?.value.trim() || null;
+    await db.ref(`${ROOT}/shifts/${shift.id}/summary`).set(summary);
+    showToast('📝 הסיכום נשמר ✓', 'success');
+  }
 }
 
 // ════════════════════════════════════════════
@@ -1056,11 +1072,13 @@ function closeExpand(id) {
 //  NOTE MODAL
 // ════════════════════════════════════════════
 
-function openNoteModal(shift) {
+function openNoteModal(shift, type = 'note') {
   const d = new Date(shift.date);
+  const isSummary = type === 'summary';
   document.getElementById('modalTitle').textContent =
-    `📋 ${DAY_NAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
-  document.getElementById('modalBody').textContent = shift.note || '';
+    `${isSummary ? '📝 סיכום' : '📋 הערה'} — ${DAY_NAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+  document.getElementById('modalBody').textContent =
+    isSummary ? (shift.summary || '') : (shift.note || '');
   document.getElementById('noteModal').classList.add('open');
 }
 
