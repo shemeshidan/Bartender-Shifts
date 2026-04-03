@@ -653,6 +653,15 @@
   </div>
 </div>
 
+<!-- ACTION MODAL -->
+<div class="modal-backdrop" id="actionModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="actionModalTitle"></div>
+    <div id="actionModalBtns" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -911,11 +920,11 @@ function buildCard(shift) {
     });
   });
 
-  // לחיצה על ה-slot שלי — ביטול תוך שעה
+  // לחיצה על ה-slot שלי — פתח action modal
   card.querySelectorAll('.slot.filled-me[data-action]').forEach(slot => {
     slot.addEventListener('click', e => {
       e.stopPropagation();
-      handleAction('cancel-reg', shift);
+      openActionModal(shift);
     });
   });
 
@@ -1076,6 +1085,52 @@ function closeExpand(id) {
 // ════════════════════════════════════════════
 //  NOTE MODAL
 // ════════════════════════════════════════════
+
+function openActionModal(shift) {
+  const d = new Date(shift.date);
+  const ts = shift.registeredAt?.[currentVolId];
+  const elapsed = ts ? Date.now() - ts : Infinity;
+  const canCancel = elapsed <= CANCEL_WINDOW_MS;
+  const wantsSwap = shift.swapRequests.includes(currentVolId);
+
+  document.getElementById('actionModalTitle').textContent =
+    `${DAY_NAMES[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}`;
+
+  const btns = document.getElementById('actionModalBtns');
+  btns.innerHTML = '';
+
+  if (wantsSwap) {
+    const b = document.createElement('button');
+    b.className = 'btn btn-ghost';
+    b.textContent = '✕ בטל בקשת החלפה';
+    b.onclick = () => { closeActionModal(); handleAction('cancel-swap', shift); };
+    btns.appendChild(b);
+  } else {
+    const b1 = document.createElement('button');
+    b1.className = 'btn btn-danger';
+    b1.textContent = '🔄 בקש החלפה';
+    b1.onclick = () => { closeActionModal(); handleAction('swap', shift); };
+    btns.appendChild(b1);
+
+    if (canCancel) {
+      const b2 = document.createElement('button');
+      b2.className = 'btn btn-ghost';
+      b2.textContent = '↩ בטל רישום';
+      b2.onclick = () => { closeActionModal(); handleAction('cancel-reg', shift); };
+      btns.appendChild(b2);
+    }
+  }
+
+  document.getElementById('actionModal').classList.add('open');
+}
+
+function closeActionModal() {
+  document.getElementById('actionModal').classList.remove('open');
+}
+
+document.getElementById('actionModal')?.addEventListener('click', e => {
+  if (e.target === document.getElementById('actionModal')) closeActionModal();
+});
 
 function openNoteModal(shift, type = 'note') {
   const d = new Date(shift.date);
