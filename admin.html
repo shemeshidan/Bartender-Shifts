@@ -991,7 +991,9 @@ function buildPanelContent(shift) {
     : `<div style="font-size:0.78rem;color:var(--text-dim)">כל המתנדבים כבר רשומים</div>`;
 
   // הערה
-  const noteVal = shift.note || '';
+  const noteVal    = shift.note    || '';
+  const summaryVal = shift.summary || '';
+  const isPast     = new Date(shift.date) < new Date(new Date().toDateString());
 
   return `
     <div class="panel-section">
@@ -1001,8 +1003,8 @@ function buildPanelContent(shift) {
     ${addSection}
     <div class="divider"></div>
     <div class="panel-section">
-      <div class="panel-section-title">📋 הערת משמרת</div>
-      <textarea id="noteEdit-${shift.id}" placeholder="הוספת הערה...">${noteVal}</textarea>
+      <div class="panel-section-title">📋 הערת משמרת (לפני)</div>
+      <textarea id="noteEdit-${shift.id}" placeholder="הוראות, שינוי שעות...">${noteVal}</textarea>
       <button class="btn btn-ghost btn-sm" data-action="save-note" style="align-self:flex-start">שמור הערה</button>
     </div>
     <div class="divider"></div>
@@ -1048,6 +1050,7 @@ function bindPanelEvents(inner, shift) {
         await db.ref(`${ROOT}/shifts/${shift.id}/note`).set(note);
         showToast('הערה נשמרה ✓', 'success');
       }
+
 
       if (action === 'delete-shift') {
         if (!confirm('למחוק את המשמרת הזו לגמרי?')) return;
