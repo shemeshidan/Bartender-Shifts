@@ -920,11 +920,13 @@ function buildCard(shift) {
     });
   });
 
-  // לחיצה על ה-slot שלי — פתח action modal
+  // לחיצה על ה-slot שלי — רק אחרי שעה
   card.querySelectorAll('.slot.filled-me[data-action]').forEach(slot => {
     slot.addEventListener('click', e => {
       e.stopPropagation();
-      openActionModal(shift);
+      const ts = shift.registeredAt?.[currentVolId];
+      const elapsed = ts ? Date.now() - ts : Infinity;
+      if (elapsed > CANCEL_WINDOW_MS) openActionModal(shift);
     });
   });
 
@@ -997,9 +999,7 @@ async function handleAction(action, shift) {
     if (shift.swapRequests.length > 0) {
       const swapper = shift.swapRequests[0];
       await db.ref(`${ROOT}/swapRequests/${shift.id}/${swapper}`).remove();
-      showToast(`✓ נרשמת! ${VOLUNTEERS[swapper]?.name || ''} יקבל עדכון.`, 'success');
     } else {
-      showToast('✓ נרשמת! ניתן לבטל תוך שעה.', 'success');
     }
     closeExpand(shift.id);
     return;
