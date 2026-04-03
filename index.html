@@ -950,7 +950,7 @@ function buildSlots(shift) {
       const vol = VOLUNTEERS[volId];
       const isMe = volId === currentVolId;
       const swapReq = shift.swapRequests.includes(volId);
-      const isAchmash = shift.achmash === volId;
+      const isAchmash = shift.achmash === volId || !!(VOLUNTEERS[volId]?.isAchmash);
       let cls = isMe ? 'filled-me' : (swapReq ? 'swap-needed' : 'filled');
       let icon = isAchmash ? '★' : '✓';
       let name = isMe ? 'את/ה' : (vol ? vol.name : '?');
@@ -1000,10 +1000,11 @@ const CANCEL_WINDOW_MS = 60 * 60 * 1000; // שעה אחת
 async function handleAction(action, shift) {
   if (action === 'register') {
     await db.ref(`${ROOT}/registrations/${shift.id}/${currentVolId}`).set(Date.now());
+    // אם מישהו ביקש החלפה — הסר אותו מהרישום ומבקשות ההחלפה
     if (shift.swapRequests.length > 0) {
       const swapper = shift.swapRequests[0];
+      await db.ref(`${ROOT}/registrations/${shift.id}/${swapper}`).remove();
       await db.ref(`${ROOT}/swapRequests/${shift.id}/${swapper}`).remove();
-    } else {
     }
     closeExpand(shift.id);
     return;
