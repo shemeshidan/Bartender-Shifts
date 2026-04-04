@@ -1029,6 +1029,14 @@ function buildPanelContent(shift) {
         <button class="btn btn-ghost btn-sm" data-action="save-date">שמור תאריך</button>
       </div>
     </div>
+    ${summaryVal ? `
+    <div class="divider"></div>
+    <div class="panel-section">
+      <div class="panel-section-title">📝 סיכום משמרת</div>
+      <div style="font-size:0.82rem;color:var(--text-dim);background:var(--card2);border-radius:8px;padding:8px 12px">${summaryVal}</div>
+      <button class="btn btn-danger btn-sm" data-action="delete-summary" style="align-self:flex-start;margin-top:4px">🗑 מחק סיכום</button>
+    </div>
+    ` : ''}
     <div class="divider"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-danger btn-sm" data-action="delete-shift">🗑 מחק משמרת</button>
@@ -1077,6 +1085,12 @@ function bindPanelEvents(inner, shift) {
         if (!confirm('למחוק את ההערה?')) return;
         await db.ref(`${ROOT}/shifts/${shift.id}/note`).set(null);
         showToast('ההערה נמחקה', 'success');
+      }
+
+      if (action === 'delete-summary') {
+        if (!confirm('למחוק את הסיכום?')) return;
+        await db.ref(`${ROOT}/shifts/${shift.id}/summary`).set(null);
+        showToast('הסיכום נמחק', 'success');
       }
 
       if (action === 'save-label') {
@@ -1146,7 +1160,7 @@ function renderVolunteers() {
         <div class="link-box" style="margin-top:6px">
           <span id="link-${vid}">${link}</span>
           <button class="copy-btn" onclick="copyLink('${vid}','${link}')">העתק</button>
-          ${v.phone ? `<a class="copy-btn" style="text-decoration:none;background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.4);color:#25d366" href="https://wa.me/972${v.phone.replace(/^0/,'').replace(/[-\s]/g,'')}?text=${encodeURIComponent('היי ' + v.name + '! הנה הלינק האישי שלך לשיבוץ משמרות Bartender:\n' + link)}" target="_blank">WhatsApp</a>` : ''}
+          ${v.phone ? `<a class="copy-btn" style="text-decoration:none;background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.4);color:#25d366" href="https://wa.me/972${v.phone.replace(/^0/,'').replace(/[-\s]/g,'')}?text=${encodeURIComponent('היי ' + v.name + '! הנה הלינק האישי שלך לשיבוץ משמרות Bartender:\n' + link)}" target="wa_send">WhatsApp</a>` : ''}
         </div>
         <div class="vol-edit-form" id="vol-edit-${vid}" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:8px">
           <input type="text" id="edit-name-${vid}" value="${v.name}" placeholder="שם" />
