@@ -835,18 +835,32 @@ function buildCard(shift) {
 
   // סטטוס
   let statusClass, pillClass, pillText;
-  if (hasSwapReq && !isMine) {
-    statusClass = 'status-swap'; pillClass = 'pill-swap'; pillText = '🔄 נדרש מחליף';
-  } else if (isMine && wantsSwap) {
-    statusClass = 'status-swap'; pillClass = 'pill-swap'; pillText = '🔄 ביקשת החלפה';
-  } else if (isMine) {
-    statusClass = 'status-full'; pillClass = 'pill-mine'; pillText = '✓ רשום/ה';
+  // צבע הגבול תמיד לפי מינימום — ללא קשר לרישום האישי
+  if (isMine && wantsSwap) {
+    statusClass = 'status-swap';
+  } else if (hasSwapReq && !isMine) {
+    statusClass = 'status-swap';
   } else if (shift.registered.length >= shift.minSlots) {
-    statusClass = 'status-full'; pillClass = 'pill-full'; pillText = isFull ? 'מאויש' : `מאויש (${shift.registered.length}/${shift.maxSlots})`;
+    statusClass = 'status-full';
   } else if (shift.registered.length > 0) {
-    statusClass = 'status-partial'; pillClass = 'pill-partial'; pillText = `נדרשים עוד ${shift.minSlots - shift.registered.length}`;
+    statusClass = 'status-partial';
   } else {
-    statusClass = 'status-empty'; pillClass = 'pill-empty'; pillText = 'פתוח לרישום';
+    statusClass = 'status-empty';
+  }
+
+  // טקסט ה-pill לפי מצב אישי
+  if (isMine && wantsSwap) {
+    pillClass = 'pill-swap'; pillText = '🔄 ביקשת החלפה';
+  } else if (hasSwapReq && !isMine) {
+    pillClass = 'pill-swap'; pillText = '🔄 נדרש מחליף';
+  } else if (isMine) {
+    pillClass = 'pill-mine'; pillText = '✓ רשום/ה';
+  } else if (shift.registered.length >= shift.minSlots) {
+    pillClass = 'pill-full'; pillText = isFull ? 'מאויש' : `מאויש (${shift.registered.length}/${shift.maxSlots})`;
+  } else if (shift.registered.length > 0) {
+    pillClass = 'pill-partial'; pillText = `נדרשים עוד ${shift.minSlots - shift.registered.length}`;
+  } else {
+    pillClass = 'pill-empty'; pillText = 'פתוח לרישום';
   }
 
   // בניית slots
