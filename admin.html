@@ -1029,6 +1029,16 @@ function buildPanelContent(shift) {
         <button class="btn btn-ghost btn-sm" data-action="save-date">שמור תאריך</button>
       </div>
     </div>
+    <div class="divider"></div>
+    <div class="panel-section">
+      <div class="panel-section-title">👥 מינימום מתנדבים</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="minEdit-${shift.id}" style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:0.85rem">
+          ${[1,2,3,4,5].map(n => `<option value="${n}" ${shift.minSlots===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+        <button class="btn btn-ghost btn-sm" data-action="save-min">שמור</button>
+      </div>
+    </div>
     ${summaryVal ? `
     <div class="divider"></div>
     <div class="panel-section">
@@ -1106,6 +1116,13 @@ function bindPanelEvents(inner, shift) {
         if (!newDate) return showToast('בחר תאריך', 'error');
         await db.ref(`${ROOT}/shifts/${shift.id}/date`).set(newDate);
         showToast('התאריך עודכן ✓', 'success');
+      }
+
+      if (action === 'save-min') {
+        const sel = document.getElementById(`minEdit-${shift.id}`);
+        const newMin = parseInt(sel?.value);
+        await db.ref(`${ROOT}/shifts/${shift.id}/minSlots`).set(newMin);
+        showToast('המינימום עודכן ✓', 'success');
       }
 
 
