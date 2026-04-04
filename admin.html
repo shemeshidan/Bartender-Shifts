@@ -1005,9 +1005,22 @@ function buildPanelContent(shift) {
     <div class="panel-section">
       <div class="panel-section-title">📋 הערת משמרת (לפני)</div>
       <textarea id="noteEdit-${shift.id}" placeholder="הוראות, שינוי שעות...">${noteVal}</textarea>
-      <button class="btn btn-ghost btn-sm" data-action="save-note" style="align-self:flex-start">שמור הערה</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" data-action="save-note">שמור הערה</button>
+        ${noteVal ? `<button class="btn btn-danger btn-sm" data-action="delete-note">🗑 מחק הערה</button>` : ''}
+      </div>
     </div>
     <div class="divider"></div>
+    ${shift.type === 'special' ? `
+    <div class="panel-section">
+      <div class="panel-section-title">⭐ שם האירוע</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="labelEdit-${shift.id}" value="${shift.label || ''}" placeholder="שם האירוע..." style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:0.85rem" />
+        <button class="btn btn-ghost btn-sm" data-action="save-label">שמור שם</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    ` : ''}
     <div class="panel-section">
       <div class="panel-section-title">📅 שינוי תאריך</div>
       <div style="display:flex;gap:8px;align-items:center">
@@ -1057,6 +1070,19 @@ function bindPanelEvents(inner, shift) {
         const note = ta?.value.trim() || null;
         await db.ref(`${ROOT}/shifts/${shift.id}/note`).set(note);
         showToast('הערה נשמרה ✓', 'success');
+      }
+
+      if (action === 'delete-note') {
+        if (!confirm('למחוק את ההערה?')) return;
+        await db.ref(`${ROOT}/shifts/${shift.id}/note`).set(null);
+        showToast('ההערה נמחקה', 'success');
+      }
+
+      if (action === 'save-label') {
+        const inp = document.getElementById(`labelEdit-${shift.id}`);
+        const label = inp?.value.trim() || null;
+        await db.ref(`${ROOT}/shifts/${shift.id}/label`).set(label);
+        showToast('שם האירוע עודכן ✓', 'success');
       }
 
       if (action === 'save-date') {
