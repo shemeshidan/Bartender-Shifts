@@ -841,10 +841,10 @@ function buildCard(shift) {
     statusClass = 'status-swap'; pillClass = 'pill-swap'; pillText = '🔄 ביקשת החלפה';
   } else if (isMine) {
     statusClass = 'status-full'; pillClass = 'pill-mine'; pillText = '✓ רשום/ה';
-  } else if (isFull) {
-    statusClass = 'status-full'; pillClass = 'pill-full'; pillText = 'מאויש';
   } else if (shift.registered.length >= shift.minSlots) {
-    statusClass = 'status-partial'; pillClass = 'pill-partial'; pillText = `נדרשים עוד ${shift.maxSlots - shift.registered.length}`;
+    statusClass = 'status-full'; pillClass = 'pill-full'; pillText = isFull ? 'מאויש' : `מאויש (${shift.registered.length}/${shift.maxSlots})`;
+  } else if (shift.registered.length > 0) {
+    statusClass = 'status-partial'; pillClass = 'pill-partial'; pillText = `נדרשים עוד ${shift.minSlots - shift.registered.length}`;
   } else {
     statusClass = 'status-empty'; pillClass = 'pill-empty'; pillText = 'פתוח לרישום';
   }
