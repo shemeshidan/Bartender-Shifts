@@ -900,6 +900,7 @@ function buildAdminCard(shift) {
       <div class="shift-admin-info">
         <div class="shift-admin-title">
           ${shift.type==='special' ? `⭐ ${shift.label||'ערב מיוחד'}` : 'משמרת רגילה'}
+          ${shift.note ? `<span style="font-size:0.75rem;margin-right:6px" title="${shift.note}">📋</span>` : ''}
         </div>
         <div class="shift-slots-summary">${chipsHTML}</div>
       </div>
@@ -1145,6 +1146,7 @@ function renderVolunteers() {
         <div class="link-box" style="margin-top:6px">
           <span id="link-${vid}">${link}</span>
           <button class="copy-btn" onclick="copyLink('${vid}','${link}')">העתק</button>
+          ${v.phone ? `<a class="copy-btn" style="text-decoration:none;background:rgba(37,211,102,0.12);border-color:rgba(37,211,102,0.4);color:#25d366" href="https://wa.me/972${v.phone.replace(/^0/,'').replace(/[-\s]/g,'')}?text=${encodeURIComponent('היי ' + v.name + '! הנה הלינק האישי שלך לשיבוץ משמרות Bartender:\n' + link)}" target="_blank">WhatsApp</a>` : ''}
         </div>
         <div class="vol-edit-form" id="vol-edit-${vid}" style="display:none;margin-top:10px;display:none;flex-direction:column;gap:8px">
           <input type="text" id="edit-name-${vid}" value="${v.name}" placeholder="שם" />
