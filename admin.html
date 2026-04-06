@@ -997,6 +997,10 @@ function buildPanelContent(shift) {
   const isPast     = new Date(shift.date) < new Date(new Date().toDateString());
 
   return `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+      <button class="btn btn-danger btn-sm" data-action="delete-shift">🗑 מחק משמרת</button>
+    </div>
+    <div class="divider"></div>
     <div class="panel-section">
       <div class="panel-section-title">מתנדבים רשומים</div>
       <div class="reg-list">${regRows}</div>
@@ -1047,10 +1051,6 @@ function buildPanelContent(shift) {
       <button class="btn btn-danger btn-sm" data-action="delete-summary" style="align-self:flex-start;margin-top:4px">🗑 מחק סיכום</button>
     </div>
     ` : ''}
-    <div class="divider"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-danger btn-sm" data-action="delete-shift">🗑 מחק משמרת</button>
-    </div>
   `;
 }
 
